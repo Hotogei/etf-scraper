@@ -1,0 +1,35 @@
+name: Daily ETF Scraper
+
+on:
+  schedule:
+    # 每天台灣時間下午 4:30 執行 (UTC 8:30)
+    - cron: '30 8 * * *'
+  workflow_dispatch: # 讓您可以手動點擊按鈕來測試執行
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+
+    steps:
+    - name: 複製儲存庫代碼
+      uses: actions/checkout@v3
+
+    - name: 設定 Python 環境
+      uses: actions/setup-python@v4
+      with:
+        python-version: '3.10'
+
+    - name: 安裝必要套件
+      run: |
+        pip install -r requirements.txt
+
+    - name: 執行爬蟲程式
+      run: python main.py
+
+    - name: 將抓到的資料存回 GitHub
+      run: |
+        git config --local user.email "action@github.com"
+        git config --local user.name "GitHub Action"
+        git add .
+        git commit -m "更新 00981A 持股資料" || exit 0
+        git push
